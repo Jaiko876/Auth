@@ -1,0 +1,1 @@
+INSERT INTO auth.roles VALUES (1, 'user');
