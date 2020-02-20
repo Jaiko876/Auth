@@ -2,14 +2,13 @@ package qas.auth.auth.controller;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
+import qas.auth.auth.dto.AuthDto;
 import qas.auth.auth.dto.RegObj;
 import qas.auth.auth.dto.UserDto;
 import qas.auth.auth.dto.ValidatedToken;
@@ -33,11 +32,13 @@ public class AuthenticationRestController {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
     }
-
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ResponseEntity login(@RequestBody RegObj regObj) {
+    public ResponseEntity login(@RequestBody AuthDto regObj) {
         try {
+            System.out.println(regObj.getUsername());
+            System.out.println(regObj.getPassword());
             userService.checkLogin(regObj.getUsername());
+
             UserDto user = userService.findByUserName(regObj.getUsername());
 
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getLogin(),
@@ -49,11 +50,13 @@ public class AuthenticationRestController {
 
             Map<Object, Object> response = new HashMap<>();
             response.put("token", token);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
 
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(token, HttpStatus.OK);
         } catch (AuthenticationException e) {
             log.info("Trace", e);
-            return new ResponseEntity<>(e, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }
 

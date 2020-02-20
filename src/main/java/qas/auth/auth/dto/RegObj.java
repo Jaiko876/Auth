@@ -8,4 +8,7 @@ import lombok.Data;
 public class RegObj {
     private String username;
     private String password;
+    private String fio;
+    private String email;
+    private int telegramChatId;
 }
