@@ -1,4 +1,4 @@
-package qas.auth.auth.dto;
+package qas.auth.auth.dto.transferObjects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

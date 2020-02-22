@@ -1,6 +1,5 @@
 package qas.auth.auth.controller;
 
-import org.jooq.tools.json.JSONObject;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,7 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import qas.auth.auth.dto.RegObj;
 import qas.auth.auth.dto.UserDto;
-import qas.auth.auth.dto.UserForDBc;
+import qas.auth.auth.dto.transferObjects.RoleTransfer;
+import qas.auth.auth.dto.transferObjects.UserForDBc;
 import qas.auth.auth.security.jwt.JwtTokenProvider;
 import qas.auth.auth.services.UserService;
 
@@ -28,6 +28,7 @@ public class RegistrationController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ResponseEntity register(@RequestBody RegObj regObj) {
+
         UserDto userDto = new UserDto();
         userDto.setLogin(regObj.getUsername());
         userDto.setPassword(regObj.getPassword());
@@ -42,10 +43,23 @@ public class RegistrationController {
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
+        HttpEntity headerEntity = new HttpEntity(headers);
         HttpEntity<UserForDBc> request = new HttpEntity<>(userForDBc, headers);
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.exchange("http://localhost:8080/user", HttpMethod.POST, request,
-                        ResponseEntity.class);
+        ResponseEntity<ResponseEntity> exchange = restTemplate.exchange("http://localhost:8080/user", HttpMethod.POST, request,
+                ResponseEntity.class);
+
+        RoleTransfer roleTransfer = new RoleTransfer();
+        roleTransfer.setId_role(4);
+        roleTransfer.setName("Сотрудник");
+        HttpEntity<RoleTransfer> roleTransferHttpEntity = new HttpEntity<>(roleTransfer, headers);
+
+
+        /*ResponseEntity<RoleTransfer> roleTransferResponseEntity = restTemplate.exchange("http://localhost:8080/role"
+                , HttpMethod.GET, headerEntity, RoleTransfer.class);*/
+        ResponseEntity<ResponseEntity> AnotherExchange = restTemplate.exchange("http://localhost:8080/user/role/{id}"
+                , HttpMethod.POST, roleTransferHttpEntity, ResponseEntity.class, userForDBc.getId_user());
+        System.out.println(exchange.getBody());
 
         return new ResponseEntity(HttpStatus.OK);
     }
